@@ -1,3 +1,4 @@
+const bcrypt = require("bcryptjs")
 const db = require("../database/dbConfig")
 
 function find() {
@@ -12,6 +13,13 @@ function findBy(filter) {
 }
 
 async function add(user) {
+  // second parameter is the time complexity, not the number of rounds.
+  // bcrypt is based on the blowfish cipher, which says that the rounds
+  // is 2 to the power of the time complexity.
+  //
+  // in other words, 2^14 === 16,384 rounds
+  user.password = await bcrypt.hash(user.password, 14)
+
   const [id] = await db("users")
     .insert(user)
  

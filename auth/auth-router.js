@@ -1,3 +1,4 @@
+const bcrypt = require("bcryptjs")
 const express = require("express")
 const usersModel = require("../users/users-model")
 
@@ -17,8 +18,12 @@ router.post("/login", async (req, res, next) => {
   try {
     const { username, password } = req.body
     const user = await usersModel.findBy({ username }).first()
+    // since bcrypt hashes generate different results due to the salting,
+    // we rely on the magic internals to compare hashes (rather than doing
+    // it manulally by re-hashing and comparing)
+    const passwordValid = await bcrypt.compare(password, user.password)
 
-    if (user) {
+    if (user && passwordValid) {
       res.status(200).json({
         message: `Welcome ${user.username}!`,
       })
